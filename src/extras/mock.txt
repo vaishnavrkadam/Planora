@@ -1,0 +1,37 @@
+// Temporary structured mock data matching your exact layout blueprint 
+const mockItinerary = {
+  title: "The Tokyo Zen Journey",
+  dates: "Oct 12 — Oct 26",
+  travelers: "2 Travelers",
+  days: ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6"],
+  timeline: [
+    {
+      time: "09:30 AM",
+      type: "ARRIVAL",
+      cost: "$1,240",
+      title: "Narita Int. Airport (NRT)",
+      desc: "Lufthansa Flight LH710. Welcome to Japan! A private chauffeur will be waiting at Gate 4B.",
+      tag: "Private Transfer",
+      image: "https://images.unsplash.com/photo-1542296332-2e4473fac563?w=500&auto=format&fit=crop&q=60" 
+    },
+    {
+      time: "12:00 PM",
+      type: "CHECK IN",
+      cost: "5 Nights",
+      title: "Park Hyatt Tokyo",
+      desc: "Experience breathtaking views of Shinjuku. Your suite includes a complimentary tea ceremony set.",
+      tag: "Shinjuku District",
+      hasActions: true,
+      image: "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?w=500&auto=format&fit=crop&q=60"
+    },
+    {
+      time: "04:30 PM",
+      type: "SIGHTSEEING",
+      cost: "⭐⭐⭐⭐⭐",
+      title: "Shinjuku Gyoen National Garden",
+      desc: "Walk through 144 acres of traditional Japanese, French, and English gardens. AI suggests the Greenhouse for rare orchids.",
+      tags: ["Photography Spot", "Highly Rated"],
+      image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=500&auto=format&fit=crop&q=60"
+    }
+  ]
+};
