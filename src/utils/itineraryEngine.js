@@ -55,6 +55,8 @@ export async function generateBudgetItinerary(city, totalBudget, totalDays, pref
             title: candidate.activityName,
             desc: candidate.description,
             tags: [candidate.costCategory, candidate.category],
+            latitude: candidate.latitude,
+            longitude: candidate.longitude,
             image: candidate.category === 'Nature' 
               ? 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=500&auto=format&fit=crop&q=60'
               : 'https://images.unsplash.com/photo-1542296332-2e4473fac563?w=500&auto=format&fit=crop&q=60'
