@@ -48,7 +48,7 @@ export default function DataImporter() {
     setStatus({ type: '', msg: '' });
 
     try {
-      const targetCollection = collection(db, 'Destinations_Activities');
+      const targetCollection = collection(db, 'Local_Costs');
       let uploadedCount = 0;
 
       for (const row of parsedRows) {

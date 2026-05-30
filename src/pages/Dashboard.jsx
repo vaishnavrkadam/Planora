@@ -19,8 +19,25 @@ const availableCities = [
   { value: 'Mumbai', label: 'Mumbai, India' },
   { value: 'Jaipur', label: 'Jaipur, India' },
   { value: 'Agra', label: 'Agra, India' },
+  { value: 'San Francisco', label: 'San Francisco, USA' },
+  { value: 'Tokyo', label: 'Tokyo, Japan' },
+  { value: 'Bengaluru', label: 'Bengaluru, India' },
+  { value: 'Kolkata', label: 'Kolkata, India' },
+  { value: 'Kochi', label: 'Kochi, India' },
+  { value: 'Goa', label: 'Goa, India' },
+  { value: 'Varanasi', label: 'Varanasi, India' },
+  { value: 'Udaipur', label: 'Udaipur, India' },
+  { value: 'Amritsar', label: 'Amritsar, India' },
+  { value: 'Hyderabad', label: 'Hyderabad, India' },
+  { value: 'Srinagar', label: 'Srinagar, India' },
+  { value: 'Leh Ladakh', label: 'Leh Ladakh, India' },
+  { value: 'Munnar', label: 'Munnar, India' },
+  { value: 'Darjeeling', label: 'Darjeeling, India' },
+  { value: 'Puducherry', label: 'Puducherry, India' },
+  { value: 'Hampi', label: 'Hampi, India' },
   { value: 'Mysuru', label: 'Mysuru, India' },
-  { value: 'Tokyo', label: 'Tokyo, Japan' }
+  { value: 'Shimla', label: 'Shimla, India' },
+  { value: 'Rishikesh', label: 'Rishikesh, India' }
 ];
 
 export default function Dashboard() {
@@ -58,7 +75,7 @@ export default function Dashboard() {
     }
 
     try {
-      const result = await generateBudgetItinerary(toLocation, budget, days, activePreferences);
+      const result = await generateBudgetItinerary(toLocation, budget, days, activePreferences, travelers);
       if (result.error) {
         setAlgoError(result.error);
         setItinerary(null);
@@ -140,7 +157,7 @@ export default function Dashboard() {
                 <Typography variant="body2" sx={{ fontWeight: '600', color: '#958ea0', letterSpacing: '0.05em' }}>ESTIMATED BUDGET</Typography>
                 <Typography variant="body1" sx={{ fontWeight: '700', color: '#d0bcff' }}>${budget.toLocaleString()}</Typography>
               </Box>
-              <Slider value={budget} min={1000} max={15000} step={100} onChange={(e, val) => setBudget(val)} sx={{ color: '#8B5CF6', mb: 0.5 }} />
+              <Slider value={budget} min={0} max={2000} step={5} onChange={(e, val) => setBudget(val)} sx={{ color: '#8B5CF6', mb: 0.5 }} />
               <Box display="flex" justifyContent="space-between" sx={{ color: '#958ea0', fontSize: '11px', fontWeight: '700', letterSpacing: '0.05em', px: 0.5 }}>
                 <Typography variant="caption">BUDGET</Typography>
                 <Typography variant="caption">MID-RANGE</Typography>
@@ -275,7 +292,7 @@ export default function Dashboard() {
                             <Typography variant="h6" sx={{ fontWeight: '800', color: '#fff', fontSize: '18px' }}>{item.cost}</Typography>
                           </Box>
                           <Typography variant="h5" sx={{ fontSize: '20px', fontWeight: '700', mb: 1, color: '#fff' }}>{item.title}</Typography>
-                          <Typography variant="body2" sx={{ color: '#cbc3d7', mb: 2, lineHeight: 1.6 }}>{item.desc}</Typography>
+                          <Typography variant="body2" sx={{ color: '#cbc3d7', mb: 2, lineHeight: 1.6 }}>{item.description}</Typography>
                           <Stack direction="row" spacing={1}>{item.tags.map((t, i) => (<Chip key={i} label={t} size="small" sx={{ backgroundColor: 'rgba(139, 92, 246, 0.1)', color: '#d0bcff', fontSize: '11px' }} />))}</Stack>
                         </Box>
                       </Paper>

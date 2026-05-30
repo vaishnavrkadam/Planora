@@ -1,0 +1,24 @@
+city,country,hotelBudgetPerNight,hotelMidRangePerNight,hotelLuxuryPerNight,avgMealCostBudget,avgMealCostMidRange,avgMealCostLuxury
+Delhi,India,25,65,180,5,15,45
+Mumbai,India,35,90,250,6,20,55
+Jaipur,India,20,50,160,4,12,35
+Agra,India,18,45,140,4,10,30
+San Francisco,USA,120,240,550,18,40,110
+Tokyo,Japan,65,140,380,10,25,85
+Bengaluru,India,28,70,200,5,15,40
+Kolkata,India,20,55,150,4,10,35
+Kochi,India,22,50,140,4,12,35
+Goa,India,30,75,220,6,18,45
+Varanasi,India,15,40,130,3,9,30
+Udaipur,India,25,60,240,4,14,40
+Amritsar,India,18,45,120,3,9,28
+Hyderabad,India,24,60,170,4,12,38
+Srinagar,India,30,70,180,5,14,35
+Leh Ladakh,India,35,75,160,5,12,30
+Munnar,India,25,55,150,4,10,30
+Darjeeling,India,25,60,160,4,11,32
+Puducherry,India,22,55,145,5,14,35
+Hampi,India,15,35,110,3,8,25
+Mysuru,India,18,42,120,3,9,28
+Shimla,India,28,65,175,4,12,35
+Rishikesh,India,15,40,150,3,9,30
