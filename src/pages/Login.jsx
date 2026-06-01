@@ -27,7 +27,7 @@ export default function Login() {
       } else {
         // Existing users go straight to the dashboard
         await signInWithEmailAndPassword(auth, email, password);
-        navigate('/dashboard');
+        navigate('/profile');
       }
     } catch (err) {
       setError(err.message.replace('Firebase: ', ''));

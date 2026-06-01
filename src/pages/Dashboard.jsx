@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   Container, Grid, Paper, Typography, Box, TextField, Slider, 
   Button, IconButton, Stack, Chip, CardMedia, CircularProgress, Alert,
-  FormControl, InputLabel, Select, MenuItem
+  FormControl, InputLabel, Select, MenuItem, Snackbar
 } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
@@ -10,7 +10,13 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import AddIcon from '@mui/icons-material/Add';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import MapIcon from '@mui/icons-material/Map';
+import BookmarkAddIcon from '@mui/icons-material/BookmarkAdd';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 
+import { auth, db } from '../firebase';
+import { collection, addDoc } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
+import LocalParkingIcon from '@mui/icons-material/LocalParking';
 import { generateBudgetItinerary } from '../utils/itineraryEngine';
 import TripMap from '../components/TripMap';
 
@@ -40,20 +46,28 @@ const availableCities = [
   { value: 'Rishikesh', label: 'Rishikesh, India' }
 ];
 
-export default function Dashboard() {
-  const [fromLocation, setFromLocation] = useState('San Francisco');
-  const [toLocation, setToLocation] = useState('Jaipur');
-  const [budget, setBudget] = useState(5200);
-  const [days, setDays] = useState(3); 
-  const [travelers, setTravelers] = useState(2);
+export default function Dashboard({ loadedSavedTrip, setLoadedSavedTrip }) {
+  const [fromLocation, setFromLocation] = useState('Goa');
+  const [toLocation, setToLocation] = useState('Bengaluru');
+  const [budget, setBudget] = useState(1000);
+  const [days, setDays] = useState(1); 
+  const [travelers, setTravelers] = useState(1);
+  const navigate = useNavigate();
+  
+  // NEW FORM STATE: Standard departure date picker baseline string
+  const [startDate, setStartDate] = useState('2026-10-15'); 
+  
   const [selectedDay, setSelectedDay] = useState('Day 1');
   const [activePreferences, setActivePreferences] = useState(['History', 'Sightseeing']);
   
-  const [itinerary, setItinerary] = useState(null);
+  const [itinerary, setItinerary] = useState(loadedSavedTrip || null);
   const [algoLoading, setAlgoLoading] = useState(false);
   const [algoError, setAlgoError] = useState('');
 
-  // New interactive map tracking state values
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastOpen, setToastOpen] = useState(false);
+
   const [mapFocusedCoords, setMapFocusedCoords] = useState(null);
   const [forceMapBounds, setForceMapBounds] = useState(true);
 
@@ -75,7 +89,8 @@ export default function Dashboard() {
     }
 
     try {
-      const result = await generateBudgetItinerary(toLocation, budget, days, activePreferences, travelers);
+      // PASS RE-ROUTED DATE TO THE LOGIC CORE
+      const result = await generateBudgetItinerary(toLocation, budget, days, activePreferences, travelers, startDate);
       if (result.error) {
         setAlgoError(result.error);
         setItinerary(null);
@@ -83,13 +98,49 @@ export default function Dashboard() {
         setItinerary(result);
         setSelectedDay('Day 1'); 
         setMapFocusedCoords(null);
-        setForceMapBounds(true); // Default to showing all locations on fresh generate
+        setForceMapBounds(true);
       }
     } catch (err) {
       setAlgoError("Failed to parse live itinerary engine calculations from Firestore.");
       setItinerary(null);
     } finally {
       setAlgoLoading(false);
+    }
+  };
+
+  const handleSaveItinerary = async () => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      setToastMessage("You must be logged in to save itineraries.");
+      setToastOpen(true);
+      return;
+    }
+
+    setSaveLoading(true);
+    try {
+      const itineraryPayload = {
+        userId: currentUser.uid,
+        userEmail: currentUser.email,
+        destinationCity: toLocation,
+        originCity: fromLocation,
+        totalBudget: budget,
+        calculatedTotalExpense: itinerary.calculatedTotalExpense,
+        travelDays: days,
+        travelersCount: travelers,
+        startDate: startDate,
+        savedAt: new Date().toISOString(),
+        title: itinerary.title,
+        scheduleDetails: itinerary.timeline 
+      };
+
+      await addDoc(collection(db, 'Saved_Itineraries'), itineraryPayload);
+      setToastMessage("🎉 Itinerary successfully saved to your cloud profile!");
+      setToastOpen(true);
+    } catch (err) {
+      setToastMessage(`Error saving to cloud: ${err.message}`);
+      setToastOpen(true);
+    } finally {
+      setSaveLoading(false);
     }
   };
 
@@ -155,9 +206,9 @@ export default function Dashboard() {
             <Box>
               <Box display="flex" justifyContent="space-between" mb={1}>
                 <Typography variant="body2" sx={{ fontWeight: '600', color: '#958ea0', letterSpacing: '0.05em' }}>ESTIMATED BUDGET</Typography>
-                <Typography variant="body1" sx={{ fontWeight: '700', color: '#d0bcff' }}>${budget.toLocaleString()}</Typography>
+                <Typography variant="body1" sx={{ fontWeight: '700', color: '#d0bcff' }}>₹{budget.toLocaleString()}</Typography>
               </Box>
-              <Slider value={budget} min={0} max={2000} step={5} onChange={(e, val) => setBudget(val)} sx={{ color: '#8B5CF6', mb: 0.5 }} />
+              <Slider value={budget} min={0} max={15000} step={100} onChange={(e, val) => setBudget(val)} sx={{ color: '#8B5CF6', mb: 0.5 }} />
               <Box display="flex" justifyContent="space-between" sx={{ color: '#958ea0', fontSize: '11px', fontWeight: '700', letterSpacing: '0.05em', px: 0.5 }}>
                 <Typography variant="caption">BUDGET</Typography>
                 <Typography variant="caption">MID-RANGE</Typography>
@@ -183,6 +234,18 @@ export default function Dashboard() {
                   <IconButton onClick={() => setTravelers(t => t + 1)} sx={{ color: '#fff' }}><AddIcon fontSize="small" /></IconButton>
                 </Box>
               </Box>
+            </Box>
+
+            {/* NEW START DATE FORM PICKER CONTROL */}
+            <Box>
+              <Typography variant="caption" sx={{ color: '#958ea0', fontWeight: '600', display: 'block', mb: 1 }}>DEPARTURE DATE</Typography>
+              <TextField
+                type="date"
+                fullWidth
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                slotProps={{ input: { startAdornment: <CalendarMonthIcon sx={{ color: '#958ea0', mr: 1 }} /> } }}
+              />
             </Box>
 
             <Box>
@@ -234,9 +297,18 @@ export default function Dashboard() {
                     <span>{itinerary.dates}</span> • <span style={{ color: '#ffafd3', fontWeight: '600' }}>Cost Profile Total: ${itinerary.calculatedTotalExpense}</span>
                   </Typography>
                 </Box>
+
+                <Button
+                  variant="contained"
+                  disabled={saveLoading}
+                  startIcon={saveLoading ? <CircularProgress size={16} color="inherit" /> : <BookmarkAddIcon />}
+                  onClick={handleSaveItinerary}
+                  sx={{ backgroundColor: '#e364a7', borderRadius: '14px', px: 3, py: 1.2, fontWeight: '700', color: '#fff', '&:hover': { backgroundColor: '#d04f93' } }}
+                >
+                  {saveLoading ? 'Saving Plan...' : 'Save Itinerary'}
+                </Button>
               </Box>
 
-              {/* Days Navigation with dynamic sub-state resets */}
               <Stack direction="row" spacing={1.5} sx={{ overflowX: 'auto', pb: 1, '&::-webkit-scrollbar': { display: 'none' } }}>
                 {itinerary.days.map((day) => (
                   <Chip key={day} label={day}
@@ -246,7 +318,6 @@ export default function Dashboard() {
                 ))}
               </Stack>
 
-              {/* MAP WORKSPACE LAYER WITH ACTION BAR */}
               <Box>
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
                   <Typography variant="caption" sx={{ color: '#958ea0', fontWeight: '700', letterSpacing: '0.05em' }}>
@@ -267,7 +338,6 @@ export default function Dashboard() {
                 />
               </Box>
 
-              {/* TIMELINE VIEW WITH SELECTION TRIGGER INJECTIONS */}
               <Box sx={{ position: 'relative', pl: 5, mt: 1 }}>
                 <Box sx={{ position: 'absolute', left: '6px', top: '24px', bottom: '24px', width: '2px', backgroundColor: 'rgba(255, 255, 255, 0.12)' }} />
 
@@ -277,7 +347,6 @@ export default function Dashboard() {
                     <Box key={idx} sx={{ position: 'relative', mb: 4 }}>
                       <Box sx={{ position: 'absolute', left: '-44px', top: '24px', transform: 'translateY(-50%)', width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#8B5CF6', border: '3px solid #0b1326', boxShadow: '0 0 10px #8B5CF6', zIndex: 2 }} />
 
-                      {/* Interactive Card Action Shell */}
                       <Paper 
                         onClick={() => handleCardClick(item.latitude, item.longitude)}
                         sx={{ 
@@ -293,7 +362,33 @@ export default function Dashboard() {
                           </Box>
                           <Typography variant="h5" sx={{ fontSize: '20px', fontWeight: '700', mb: 1, color: '#fff' }}>{item.title}</Typography>
                           <Typography variant="body2" sx={{ color: '#cbc3d7', mb: 2, lineHeight: 1.6 }}>{item.description}</Typography>
+
                           <Stack direction="row" spacing={1}>{item.tags.map((t, i) => (<Chip key={i} label={t} size="small" sx={{ backgroundColor: 'rgba(139, 92, 246, 0.1)', color: '#d0bcff', fontSize: '11px' }} />))}</Stack>
+
+                          {/* DYNAMIC IOT PARKING BOOKING ANCHOR BUTTON */}
+                          {item.title === "Cubbon Park Heritage Walk & Coffee" && (
+                            <Box sx={{ mt: 2 }}>
+                              <Button
+                                variant="contained"
+                                size="small"
+                                startIcon={<LocalParkingIcon />}
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Prevents the card's map click function from firing!
+                                  navigate(`/park-checkout?slotId=CUBBON_01&title=${encodeURIComponent(item.title)}`);
+                                }}
+                                sx={{ 
+                                  backgroundColor: '#8B5CF6', 
+                                  borderRadius: '10px', 
+                                  textTransform: 'none', 
+                                  fontWeight: '700',
+                                  color: '#fff',
+                                  '&:hover': { backgroundColor: '#7c3aed' }
+                                }}
+                              >
+                                Book Parking Slot 🚗
+                              </Button>
+                            </Box>
+                          )}
                         </Box>
                       </Paper>
                     </Box>
@@ -303,8 +398,15 @@ export default function Dashboard() {
             </Box>
           )}
         </Grid>
-
       </Grid>
+
+      <Snackbar
+        open={toastOpen}
+        autoHideDuration={4000}
+        onClose={() => setToastOpen(false)}
+        message={toastMessage}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      />
     </Container>
   );
 }
