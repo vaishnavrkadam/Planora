@@ -84,7 +84,7 @@ export async function generateBudgetItinerary(city, totalBudget, totalDays, pref
 
     if (remainingActivityBudget < 0) {
       return { 
-        error: `Your budget of $${totalBudget.toLocaleString()} is too tight. Logistics (Hotel + Food) will cost roughly $${(totalGroupHotelCost + totalGroupMealCost).toLocaleString()}.` 
+        error: `Your budget of ₹${totalBudget.toLocaleString()} is too tight. Logistics (Hotel + Food) will cost roughly ₹${(totalGroupHotelCost + totalGroupMealCost).toLocaleString()}.` 
       };
     }
 
@@ -137,7 +137,7 @@ export async function generateBudgetItinerary(city, totalBudget, totalDays, pref
           day: `Day ${d}`,
           time: "08:30 AM",
           type: "LOGISTICS",
-          cost: d === totalDays ? "Check-out" : `$${(cityBaselines.hotelCostPerNight * totalRoomsNeeded).toLocaleString()}`,
+          cost: d === totalDays ? "Check-out" : `₹${(cityBaselines.hotelCostPerNight * totalRoomsNeeded).toLocaleString()}`,
           title: `${cityBaselines.tier} Lodging (${totalRoomsNeeded} Rooms)`,
           description: `Group accommodations setup baseline.`,
           tags: ["Hotel"],
@@ -171,7 +171,7 @@ export async function generateBudgetItinerary(city, totalBudget, totalDays, pref
               day: `Day ${d}`,
               time: formatClockTime(currentClockTime),
               type: (candidate.category || "Sightseeing").toUpperCase(),
-              cost: totalGroupActivityCost === 0 ? 'Free Entry' : `$${totalGroupActivityCost.toLocaleString()}`,
+              cost: totalGroupActivityCost === 0 ? 'Free Entry' : `₹${totalGroupActivityCost.toLocaleString()}`,
               title: candidate.activityName,
               description: `${candidate.description || ''} (Duration: ${candidate.averageDuration || '2 hours'})`,
               tags: [candidate.costCategory || "Budget", `Duration: ${candidate.averageDuration || '2h'}`],
@@ -213,7 +213,7 @@ export async function generateBudgetItinerary(city, totalBudget, totalDays, pref
           day: `Day ${d}`,
           time: "08:00 PM",
           type: "DINING",
-          cost: `$${(cityBaselines.mealCostPerDay * groupSize).toLocaleString()}`,
+          cost: `₹${(cityBaselines.mealCostPerDay * groupSize).toLocaleString()}`,
           title: `Dinner Allocation`,
           description: `Daily dining allowances for ${groupSize} travelers.`,
           tags: ["Food"],
